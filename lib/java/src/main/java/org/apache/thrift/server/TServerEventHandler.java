@@ -19,6 +19,7 @@
 
 package org.apache.thrift.server;
 
+import java.net.SocketAddress;
 import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TTransport;
 
@@ -38,7 +39,7 @@ public interface TServerEventHandler {
   void preServe();
 
   /** Called when a new client has connected and is about to being processing. */
-  ServerContext createContext(TProtocol input, TProtocol output);
+  ServerContext createContext(TProtocol input, TProtocol output, SocketAddress remoteAddress);
 
   /** Called when a client has finished request-handling to delete server context. */
   void deleteContext(ServerContext serverContext, TProtocol input, TProtocol output);

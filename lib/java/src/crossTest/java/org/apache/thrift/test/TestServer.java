@@ -19,6 +19,7 @@
 
 package org.apache.thrift.test;
 
+import java.net.SocketAddress;
 import org.apache.thrift.TMultiplexedProcessor;
 import org.apache.thrift.protocol.TBinaryProtocol;
 import org.apache.thrift.protocol.TCompactProtocol;
@@ -69,8 +70,11 @@ public class TestServer {
 
     int connectionId;
 
-    public TestServerContext(int connectionId) {
+    SocketAddress remoteAddress;
+
+    public TestServerContext(int connectionId, SocketAddress remoteAddress) {
       this.connectionId = connectionId;
+      this.remoteAddress = remoteAddress;
     }
 
     public int getConnectionId() {
@@ -79,6 +83,14 @@ public class TestServer {
 
     public void setConnectionId(int connectionId) {
       this.connectionId = connectionId;
+    }
+
+    public SocketAddress getRemoteAddress() {
+      return remoteAddress;
+    }
+
+    public void setRemoteAddress(SocketAddress remoteAddress) {
+      this.remoteAddress = remoteAddress;
     }
 
     @Override
@@ -110,9 +122,10 @@ public class TestServer {
           "TServerEventHandler.preServe - called only once before server starts accepting connections");
     }
 
-    public ServerContext createContext(TProtocol input, TProtocol output) {
+    public ServerContext createContext(
+        TProtocol input, TProtocol output, SocketAddress remoteAddress) {
       // we can create some connection level data which is stored while connection is alive & served
-      TestServerContext ctx = new TestServerContext(nextConnectionId++);
+      TestServerContext ctx = new TestServerContext(nextConnectionId++, remoteAddress);
       System.out.println(
           "TServerEventHandler.createContext - connection #"
               + ctx.getConnectionId()

@@ -22,6 +22,7 @@ package org.apache.thrift.transport.sasl;
 import static org.apache.thrift.transport.sasl.NegotiationStatus.COMPLETE;
 import static org.apache.thrift.transport.sasl.NegotiationStatus.OK;
 
+import java.net.SocketAddress;
 import java.nio.channels.SelectionKey;
 import java.nio.charset.StandardCharsets;
 import javax.security.sasl.SaslServer;
@@ -32,6 +33,7 @@ import org.apache.thrift.protocol.TProtocolFactory;
 import org.apache.thrift.server.ServerContext;
 import org.apache.thrift.server.TServerEventHandler;
 import org.apache.thrift.transport.TMemoryTransport;
+import org.apache.thrift.transport.TNonblockingSocket;
 import org.apache.thrift.transport.TNonblockingTransport;
 import org.apache.thrift.transport.TTransportException;
 import org.apache.thrift.transport.sasl.TSaslNegotiationException.ErrorType;
@@ -324,7 +326,10 @@ public class NonblockingSaslHandler {
 
       if (eventHandler != null) {
         if (!serverContextCreated) {
-          serverContext = eventHandler.createContext(requestProtocol, responseProtocol);
+          TNonblockingSocket socket = (TNonblockingSocket) underlyingTransport;
+          SocketAddress remoteAddress = socket.getSocketChannel().socket().getRemoteSocketAddress();
+          serverContext =
+              eventHandler.createContext(requestProtocol, responseProtocol, remoteAddress);
           serverContextCreated = true;
         }
         eventHandler.processContext(serverContext, memoryTransport, memoryTransport);

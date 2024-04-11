@@ -20,6 +20,7 @@
 package org.apache.thrift.server;
 
 import java.io.IOException;
+import java.net.SocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -34,6 +35,7 @@ import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.transport.TIOStreamTransport;
 import org.apache.thrift.transport.TMemoryInputTransport;
 import org.apache.thrift.transport.TNonblockingServerTransport;
+import org.apache.thrift.transport.TNonblockingSocket;
 import org.apache.thrift.transport.TNonblockingTransport;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
@@ -296,7 +298,9 @@ public abstract class AbstractNonblockingServer extends TServer {
       outProt_ = outputProtocolFactory_.getProtocol(outTrans_);
 
       if (eventHandler_ != null) {
-        context_ = eventHandler_.createContext(inProt_, outProt_);
+        TNonblockingSocket socket = (TNonblockingSocket) trans_;
+        SocketAddress remoteAddress = socket.getSocketChannel().socket().getRemoteSocketAddress();
+        context_ = eventHandler_.createContext(inProt_, outProt_, remoteAddress);
       } else {
         context_ = null;
       }
