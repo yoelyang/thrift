@@ -74,8 +74,11 @@ object TestServer {
         }
     }
 
-    internal class TestServerContext(var connectionId: Int, var remoteAddress: SocketAddress) :
-        ServerContext {
+    internal class TestServerContext(
+        var connectionId: Int,
+        var remoteSocketAddress: SocketAddress,
+        var localSocketAddress: SocketAddress
+    ) : ServerContext {
 
         override fun <T> unwrap(iface: Class<T>): T {
             try {
@@ -107,11 +110,12 @@ object TestServer {
         override fun createContext(
             input: TProtocol,
             output: TProtocol,
-            remoteAddress: SocketAddress
+            remoteSocketAddress: SocketAddress,
+            localSocketAddress: SocketAddress
         ): ServerContext {
             // we can create some connection level data which is stored while connection is alive &
             // served
-            val ctx = TestServerContext(nextConnectionId++, remoteAddress)
+            val ctx = TestServerContext(nextConnectionId++, remoteSocketAddress, localSocketAddress)
             println(
                 "TServerEventHandler.createContext - connection #" +
                     ctx.connectionId +

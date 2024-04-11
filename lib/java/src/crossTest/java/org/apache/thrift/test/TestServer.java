@@ -70,11 +70,15 @@ public class TestServer {
 
     int connectionId;
 
-    SocketAddress remoteAddress;
+    SocketAddress remoteSocketAddress;
 
-    public TestServerContext(int connectionId, SocketAddress remoteAddress) {
+    SocketAddress localSocketAddress;
+
+    public TestServerContext(
+        int connectionId, SocketAddress remoteSocketAddress, SocketAddress localSocketAddress) {
       this.connectionId = connectionId;
-      this.remoteAddress = remoteAddress;
+      this.remoteSocketAddress = remoteSocketAddress;
+      this.localSocketAddress = localSocketAddress;
     }
 
     public int getConnectionId() {
@@ -85,12 +89,20 @@ public class TestServer {
       this.connectionId = connectionId;
     }
 
-    public SocketAddress getRemoteAddress() {
-      return remoteAddress;
+    public SocketAddress getRemoteSocketAddress() {
+      return remoteSocketAddress;
     }
 
-    public void setRemoteAddress(SocketAddress remoteAddress) {
-      this.remoteAddress = remoteAddress;
+    public void setRemoteSocketAddress(SocketAddress remoteSocketAddress) {
+      this.remoteSocketAddress = remoteSocketAddress;
+    }
+
+    public SocketAddress getLocalSocketAddress() {
+      return localSocketAddress;
+    }
+
+    public void setLocalSocketAddress(SocketAddress localSocketAddress) {
+      this.localSocketAddress = localSocketAddress;
     }
 
     @Override
@@ -123,9 +135,13 @@ public class TestServer {
     }
 
     public ServerContext createContext(
-        TProtocol input, TProtocol output, SocketAddress remoteAddress) {
+        TProtocol input,
+        TProtocol output,
+        SocketAddress remoteSocketAddress,
+        SocketAddress localSocketAddress) {
       // we can create some connection level data which is stored while connection is alive & served
-      TestServerContext ctx = new TestServerContext(nextConnectionId++, remoteAddress);
+      TestServerContext ctx =
+          new TestServerContext(nextConnectionId++, remoteSocketAddress, localSocketAddress);
       System.out.println(
           "TServerEventHandler.createContext - connection #"
               + ctx.getConnectionId()

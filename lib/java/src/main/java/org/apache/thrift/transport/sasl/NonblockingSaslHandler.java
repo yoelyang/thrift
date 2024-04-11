@@ -32,8 +32,8 @@ import org.apache.thrift.protocol.TProtocol;
 import org.apache.thrift.protocol.TProtocolFactory;
 import org.apache.thrift.server.ServerContext;
 import org.apache.thrift.server.TServerEventHandler;
+import org.apache.thrift.transport.SocketAddressProvider;
 import org.apache.thrift.transport.TMemoryTransport;
-import org.apache.thrift.transport.TNonblockingSocket;
 import org.apache.thrift.transport.TNonblockingTransport;
 import org.apache.thrift.transport.TTransportException;
 import org.apache.thrift.transport.sasl.TSaslNegotiationException.ErrorType;
@@ -326,10 +326,17 @@ public class NonblockingSaslHandler {
 
       if (eventHandler != null) {
         if (!serverContextCreated) {
-          TNonblockingSocket socket = (TNonblockingSocket) underlyingTransport;
-          SocketAddress remoteAddress = socket.getSocketChannel().socket().getRemoteSocketAddress();
+          SocketAddress remoteSocketAddress = null;
+          SocketAddress localSocketAddress = null;
+          if (underlyingTransport instanceof SocketAddressProvider) {
+            SocketAddressProvider socketAddressProvider =
+                (SocketAddressProvider) underlyingTransport;
+            remoteSocketAddress = socketAddressProvider.getRemoteSocketAddress();
+            localSocketAddress = socketAddressProvider.getLocalSocketAddress();
+          }
           serverContext =
-              eventHandler.createContext(requestProtocol, responseProtocol, remoteAddress);
+              eventHandler.createContext(
+                  requestProtocol, responseProtocol, remoteSocketAddress, localSocketAddress);
           serverContextCreated = true;
         }
         eventHandler.processContext(serverContext, memoryTransport, memoryTransport);

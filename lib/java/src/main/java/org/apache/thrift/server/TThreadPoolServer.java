@@ -32,8 +32,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.apache.thrift.TException;
 import org.apache.thrift.TProcessor;
 import org.apache.thrift.protocol.TProtocol;
+import org.apache.thrift.transport.SocketAddressProvider;
 import org.apache.thrift.transport.TServerTransport;
-import org.apache.thrift.transport.TSocket;
 import org.apache.thrift.transport.TTransport;
 import org.apache.thrift.transport.TTransportException;
 import org.slf4j.Logger;
@@ -241,10 +241,16 @@ public class TThreadPoolServer extends TServer {
         eventHandler = Optional.ofNullable(getEventHandler());
 
         if (eventHandler.isPresent()) {
-          TSocket socket = (TSocket) client_;
-          SocketAddress remoteAddress = socket.getSocket().getRemoteSocketAddress();
+          SocketAddress remoteSocketAddress = null;
+          SocketAddress localSocketAddress = null;
+          if (client_ instanceof SocketAddressProvider) {
+            SocketAddressProvider socketAddressProvider = (SocketAddressProvider) client_;
+            remoteSocketAddress = socketAddressProvider.getRemoteSocketAddress();
+            localSocketAddress = socketAddressProvider.getLocalSocketAddress();
+          }
           connectionContext =
-              eventHandler.get().createContext(inputProtocol, outputProtocol, remoteAddress);
+              eventHandler_.createContext(
+                  inputProtocol, outputProtocol, remoteSocketAddress, localSocketAddress);
         }
 
         while (true) {

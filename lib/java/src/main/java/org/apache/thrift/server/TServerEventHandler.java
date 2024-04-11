@@ -38,8 +38,15 @@ public interface TServerEventHandler {
   /** Called before the server begins. */
   void preServe();
 
-  /** Called when a new client has connected and is about to being processing. */
-  ServerContext createContext(TProtocol input, TProtocol output, SocketAddress remoteAddress);
+  /**
+   * Called when a new client has connected and is about to being processing. The
+   * remoteSocketAddress and localSocketAddress are null when transport is not socket based
+   */
+  ServerContext createContext(
+      TProtocol input,
+      TProtocol output,
+      SocketAddress remoteSocketAddress,
+      SocketAddress localSocketAddress);
 
   /** Called when a client has finished request-handling to delete server context. */
   void deleteContext(ServerContext serverContext, TProtocol input, TProtocol output);
